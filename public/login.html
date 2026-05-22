@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dwellia Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #E8EAF0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .box {
+      background: #fff;
+      border-radius: 16px;
+      padding: 44px 40px;
+      width: 340px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.09);
+      border: 1px solid rgba(0,0,0,0.07);
+      text-align: center;
+    }
+    .logo { height: 28px; margin-bottom: 32px; }
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #9ca3af;
+      margin-bottom: 7px;
+      text-align: left;
+    }
+    input {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid #e5e7eb;
+      border-radius: 9px;
+      font-size: 14px;
+      font-family: 'DM Sans', sans-serif;
+      margin-bottom: 14px;
+      transition: border-color 0.15s;
+      outline: none;
+    }
+    input:focus { border-color: #1179EB; box-shadow: 0 0 0 3px rgba(17,121,235,0.09); }
+    button {
+      width: 100%;
+      padding: 11px;
+      background: #1179EB;
+      color: #fff;
+      border: none;
+      border-radius: 9px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button:hover { background: #0a5bbf; }
+    button:disabled { background: #93c5fd; cursor: default; }
+    .error {
+      color: #dc2626;
+      font-size: 12.5px;
+      margin-top: 10px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <img class="logo" src="https://bookdwellia.com/images/dwellia-logo.png" alt="Dwellia">
+    <label for="pw">Password</label>
+    <input type="password" id="pw" placeholder="Enter password"
+           onkeydown="if(event.key==='Enter') login()">
+    <button id="btn" onclick="login()">Sign in</button>
+    <div class="error" id="err">Incorrect password. Try again.</div>
+  </div>
+
+  <script>
+    async function login() {
+      const pw = document.getElementById('pw').value;
+      const btn = document.getElementById('btn');
+      const err = document.getElementById('err');
+      if (!pw) return;
+
+      btn.disabled = true;
+      btn.textContent = 'Signing in…';
+      err.style.display = 'none';
+
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: pw })
+        });
+
+        if (res.ok) {
+          window.location.href = '/dashboard.html';
+        } else {
+          err.style.display = 'block';
+          btn.disabled = false;
+          btn.textContent = 'Sign in';
+          document.getElementById('pw').value = '';
+          document.getElementById('pw').focus();
+        }
+      } catch (e) {
+        err.textContent = 'Connection error. Please try again.';
+        err.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Sign in';
+      }
+    }
+
+    // Focus password field on load
+    document.getElementById('pw').focus();
+  </script>
+</body>
+</html>

@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dwellia Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=DM+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue: #1179EB;
+  --blue-lt: #EBF4FF;
+  --blue-mid: rgba(17,121,235,0.11);
+  --orange: #F38B2B;
+  --orange-lt: #FFF4E8;
+  --bg: #E8EAF0;
+  --white: #FFFFFF;
+  --border: rgba(0,0,0,0.07);
+  --text: #1a1d20;
+  --text-2: #6b7280;
+  --text-3: #9ca3af;
+  --green: #15803d;
+  --green-lt: rgba(21,128,61,0.09);
+  --red: #dc2626;
+  --red-lt: rgba(220,38,38,0.09);
+  --amber: #b45309;
+  --amber-lt: rgba(180,83,9,0.09);
+  --radius: 14px;
+  --radius-sm: 9px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 2px 12px rgba(0,0,0,0.04);
+  --shadow-h: 0 4px 10px rgba(0,0,0,0.09), 0 12px 28px rgba(17,121,235,0.12);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; font-size:14px; }
+
+/* ── HEADER ── */
+.header {
+  background:var(--white);
+  border-bottom:1px solid var(--border);
+  padding:0 28px;
+  height:54px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  position:sticky;
+  top:0;
+  z-index:100;
+  box-shadow:0 1px 0 rgba(0,0,0,0.04);
+}
+.header-logo { display:flex; align-items:center; }
+.header-logo img { height:28px; width:auto; display:block; }
+.header-right { display:flex; align-items:center; gap:14px; }
+.live-indicator { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--text-3); }
+.live-dot { width:6px; height:6px; border-radius:50%; background:var(--green); animation:pulse 2s infinite; flex-shrink:0; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.35} }
+.header-alert {
+  display:flex; align-items:center; gap:6px;
+  background:var(--amber-lt); color:var(--amber);
+  padding:5px 12px; border-radius:20px;
+  font-size:12px; font-weight:600; cursor:pointer;
+  border:1px solid rgba(180,83,9,0.18); transition:all 0.13s;
+}
+.header-alert:hover { background:var(--amber); color:#fff; }
+.adot { width:6px; height:6px; border-radius:50%; background:var(--amber); transition:background 0.13s; }
+.header-alert:hover .adot { background:#fff; }
+
+/* ── SECTION BLOCKS ── */
+.section-block { padding:22px 28px 0; }
+.section-block:last-of-type { padding-bottom:48px; }
+.sh { display:flex; align-items:center; gap:12px; margin-bottom:13px; }
+.sh-label { font-size:10px; font-weight:800; letter-spacing:0.10em; text-transform:uppercase; color:var(--text-3); white-space:nowrap; }
+.sh-rule  { flex:1; height:1px; background:rgba(0,0,0,0.09); }
+
+/* ── GRID ── */
+.grid { display:grid; grid-template-columns:repeat(12,1fr); gap:14px; }
+.c2  { grid-column:span 2; }
+.c3  { grid-column:span 3; }
+.c4  { grid-column:span 4; }
+.c5  { grid-column:span 5; }
+.c6  { grid-column:span 6; }
+.c7  { grid-column:span 7; }
+.c8  { grid-column:span 8; }
+.c12 { grid-column:span 12; }
+
+/* ── CARDS ── */
+.card {
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:18px 20px;
+  box-shadow:var(--shadow);
+  transition:box-shadow 0.18s, transform 0.18s, border-color 0.18s;
+  position:relative;
+  overflow:hidden;
+}
+.card.click { cursor:pointer; }
+.card.click:hover {
+  box-shadow:var(--shadow-h);
+  transform:translateY(-2px);
+  border-color:rgba(17,121,235,0.22);
+}
+.card.click::after {
+  content:'↗';
+  position:absolute; top:15px; right:16px;
+  font-size:12px; color:var(--text-3);
+  transition:color 0.13s, transform 0.13s;
+}
+.card.click:hover::after { color:var(--blue); transform:translate(2px,-2px); }
+
+/* card typography */
+.clabel {
+  font-size:10px; font-weight:700; letter-spacing:0.07em;
+  text-transform:uppercase; color:var(--text-3);
+  margin-bottom:12px; display:flex; align-items:center; gap:6px;
+}
+.cvalue { font-family:'DM Mono',monospace; font-size:28px; font-weight:600; color:var(--text); line-height:1; letter-spacing:-0.02em; margin-bottom:3px; }
+.cvalue.blue   { color:var(--blue); }
+.cvalue.orange { color:var(--orange); }
+.csub { font-size:12px; color:var(--text-2); margin-bottom:12px; }
+
+/* ── QUICK LINKS GRID ── */
+.links-grid {
+  display:grid;
+  grid-template-columns:repeat(13,1fr);
+  gap:8px;
+}
+.lnk {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  padding:10px 6px 9px;
+  border-radius:var(--radius-sm);
+  background:var(--bg);
+  border:1px solid transparent;
+  cursor:pointer;
+  text-decoration:none;
+  color:var(--text-2);
+  transition:all 0.13s;
+  text-align:center;
+}
+.lnk:hover {
+  background:var(--white);
+  border-color:rgba(17,121,235,0.20);
+  color:var(--blue);
+  box-shadow:var(--shadow);
+  transform:translateY(-1px);
+}
+.lnk-icon {
+  font-size:18px;
+  line-height:1;
+}
+.lnk-label {
+  font-size:9.5px;
+  font-weight:600;
+  letter-spacing:0.02em;
+  white-space:nowrap;
+}
+
+/* ── AI PROCESS CARDS ── */
+.ai-card {
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  padding:14px 16px;
+  box-shadow:var(--shadow);
+  transition:all 0.15s;
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+}
+.ai-card:hover {
+  box-shadow:var(--shadow-h);
+  transform:translateY(-2px);
+  border-color:rgba(17,121,235,0.20);
+}
+.ai-card::before {
+  content:'';
+  position:absolute;
+  top:0; left:0;
+  width:3px; height:100%;
+  background:var(--blue);
+  border-radius:3px 0 0 3px;
+}
+.ai-card.orange::before { background:var(--orange); }
+.ai-card.green::before  { background:var(--green); }
+.ai-card.purple::before { background:#7c3aed; }
+.ai-card.teal::before   { background:#0d9488; }
+.ai-card.pink::before   { background:#db2777; }
+.ai-card-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:5px; }
+.ai-card-title { font-size:12.5px; font-weight:700; display:flex; align-items:center; gap:7px; }
+.ai-card-icon { font-size:14px; }
+.ai-card-status { }
+.ai-card-desc { font-size:11.5px; color:var(--text-2); line-height:1.45; }
+
+/* ── BADGES ── */
+.badge { display:inline-flex; align-items:center; gap:3px; padding:2px 8px; border-radius:20px; font-size:10.5px; font-weight:600; white-space:nowrap; }
+.badge.green  { background:var(--green-lt);  color:var(--green);  }
+.badge.red    { background:var(--red-lt);    color:var(--red);    }
+.badge.amber  { background:var(--amber-lt);  color:var(--amber);  }
+.badge.blue   { background:var(--blue-mid);  color:var(--blue);   }
+.badge.orange { background:var(--orange-lt); color:var(--orange); }
+.badge.gray   { background:rgba(107,114,128,0.09); color:#6b7280; }
+.badge.purple { background:rgba(124,58,237,0.09);  color:#7c3aed; }
+
+/* ── ROWS ── */
+.row { display:flex; align-items:center; justify-content:space-between; padding:7px 0; border-bottom:1px solid rgba(0,0,0,0.05); font-size:13px; }
+.row:first-of-type { border-top:1px solid rgba(0,0,0,0.05); }
+.row:last-child { border-bottom:none; }
+.rlabel { color:var(--text-2); font-weight:500; display:flex; align-items:center; gap:7px; }
+.rval   { font-family:'DM Mono',monospace; font-weight:600; font-size:12.5px; }
+
+/* ── DOT ── */
+.dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; display:inline-block; }
+
+/* ── TOGGLES ── */
+.toggles { display:flex; gap:2px; background:var(--bg); padding:3px; border-radius:7px; width:fit-content; margin-bottom:12px; }
+.toggle  { padding:4px 11px; border-radius:5px; font-size:11.5px; font-weight:600; cursor:pointer; color:var(--text-2); transition:all 0.13s; user-select:none; }
+.toggle.active { background:var(--white); color:var(--text); box-shadow:0 1px 4px rgba(0,0,0,0.10); }
+
+/* ── SPARKLINE ── */
+.spark { display:flex; align-items:flex-end; gap:3px; height:28px; margin-top:10px; }
+.spark-b { flex:1; border-radius:3px 3px 0 0; background:var(--blue-mid); transition:all 0.25s; }
+.spark-b.hi { background:var(--blue); }
+
+/* ── SOURCE BARS ── */
+.src-row  { display:flex; align-items:center; gap:9px; margin-bottom:9px; font-size:12.5px; }
+.src-dot  { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.src-name { flex:0 0 46px; color:var(--text-2); font-weight:500; }
+.src-bg   { flex:1; height:4px; background:rgba(0,0,0,0.07); border-radius:10px; overflow:hidden; }
+.src-fill { height:100%; border-radius:10px; }
+.src-pct  { font-family:'DM Mono',monospace; font-weight:600; font-size:11px; min-width:26px; text-align:right; }
+
+/* ── STAYS ── */
+.prop-blk { padding:11px 0; border-bottom:1px solid rgba(0,0,0,0.05); }
+.prop-blk:first-child { padding-top:0; }
+.prop-blk:last-child  { border-bottom:none; padding-bottom:0; }
+.prop-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+.prop-name { font-size:13px; font-weight:700; display:flex; align-items:center; gap:7px; }
+.stay-blk  { background:var(--blue-lt); border-radius:var(--radius-sm); padding:9px 12px; display:flex; align-items:center; justify-content:space-between; }
+.stay-blk.oj { background:var(--orange-lt); }
+.stay-dates { font-family:'DM Mono',monospace; font-size:12px; font-weight:600; color:var(--blue); }
+.stay-blk.oj .stay-dates { color:var(--orange); }
+.stay-guest { font-size:12px; color:var(--text-2); font-weight:500; margin-top:2px; }
+.stay-nights { font-size:11px; font-weight:700; color:var(--text-3); text-align:right; }
+
+/* ── TASKS ── */
+.task { padding:8px 10px; border-radius:var(--radius-sm); margin-bottom:7px; border-left:3px solid transparent; font-size:13px; }
+.task:last-child { margin-bottom:0; }
+.task.overdue { border-left-color:var(--red);   background:var(--red-lt); }
+.task.today   { border-left-color:var(--amber);  background:rgba(180,83,9,0.04); }
+.task.week    { border-left-color:var(--blue);   background:rgba(17,121,235,0.03); }
+.task-title   { font-weight:600; margin-bottom:3px; }
+.task-meta    { font-size:11.5px; color:var(--text-2); display:flex; align-items:center; justify-content:space-between; }
+.tprop        { font-size:10px; font-weight:700; padding:2px 6px; border-radius:4px; text-transform:uppercase; letter-spacing:0.04em; }
+.tprop.dd     { background:var(--blue-lt); color:var(--blue); }
+.tprop.lg     { background:var(--orange-lt); color:var(--orange); }
+
+/* ── ACTION ITEMS ── */
+.aitem { padding:9px 11px; border-radius:var(--radius-sm); background:var(--bg); margin-bottom:7px; display:flex; align-items:flex-start; gap:10px; border:1px solid transparent; transition:all 0.13s; }
+.aitem:hover { background:var(--blue-lt); border-color:rgba(17,121,235,0.15); }
+.aitem:last-child { margin-bottom:0; }
+.aitem-icon  { font-size:14px; flex-shrink:0; margin-top:1px; }
+.aitem-body  { flex:1; min-width:0; }
+.aitem-title { font-size:12.5px; font-weight:600; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.aitem-meta  { font-size:11px; color:var(--text-2); display:flex; align-items:center; gap:6px; }
+
+/* ── UPSELLS ── */
+.upsell-item { padding:11px 0; border-bottom:1px solid rgba(0,0,0,0.05); }
+.upsell-item:first-child { padding-top:0; }
+.upsell-item:last-child  { border-bottom:none; padding-bottom:0; }
+.upsell-head  { display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
+.upsell-title { font-size:13px; font-weight:700; display:flex; align-items:center; gap:7px; }
+.upsell-price { font-family:'DM Mono',monospace; font-size:13px; font-weight:600; color:var(--green); }
+.upsell-desc  { font-size:12px; color:var(--text-2); line-height:1.5; margin-bottom:6px; }
+.avail        { display:flex; gap:5px; flex-wrap:wrap; }
+
+/* ── STAT GRID ── */
+.stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.stat-blk  { background:var(--bg); border-radius:var(--radius-sm); padding:10px 12px; }
+.stat-val  { font-family:'DM Mono',monospace; font-size:17px; font-weight:600; color:var(--text); margin-bottom:2px; }
+.stat-val.blue   { color:var(--blue); }
+.stat-val.green  { color:var(--green); }
+.stat-val.orange { color:var(--orange); }
+.stat-lbl  { font-size:10px; color:var(--text-3); font-weight:600; letter-spacing:0.04em; }
+
+/* ── REVIEWS ── */
+.review { padding:11px 0; border-bottom:1px solid rgba(0,0,0,0.05); }
+.review:first-child { padding-top:0; }
+.review:last-child  { border-bottom:none; padding-bottom:0; }
+.review-head  { display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
+.review-guest { font-size:13px; font-weight:700; }
+.review-meta  { display:flex; align-items:center; gap:8px; }
+.stars        { color:var(--orange); font-size:11px; letter-spacing:1px; }
+.review-date  { font-size:11px; color:var(--text-3); }
+.review-text  { font-size:12.5px; color:var(--text-2); line-height:1.55; }
+
+/* ── CALENDAR ── */
+.cal-month-label { font-size:10px; font-weight:700; color:var(--text-2); margin-bottom:5px; }
+.cal-hds { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; margin-bottom:3px; }
+.cal-hd  { font-size:8px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-3); text-align:center; }
+.cal-g   { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
+.cal-d   { aspect-ratio:1; border-radius:3px; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:600; }
+.cal-d.booked   { background:var(--blue);   color:#fff; }
+.cal-d.bookedoj { background:var(--orange); color:#fff; }
+.cal-d.open     { background:rgba(0,0,0,0.05); color:var(--text-3); }
+.cal-d.today    { outline:2px solid var(--orange); outline-offset:1px; }
+.cal-d.empty    { background:transparent; }
+
+/* ── SUB-PAGES ── */
+.subpage { display:none; }
+.subpage.active { display:block; }
+.mainpage.hidden { display:none; }
+.sub-pad { padding:24px 28px 48px; }
+.back-btn { display:inline-flex; align-items:center; gap:7px; font-size:13px; font-weight:600; color:var(--text-2); cursor:pointer; margin-bottom:20px; padding:7px 13px; border-radius:var(--radius-sm); background:var(--white); border:1px solid var(--border); box-shadow:var(--shadow); transition:all 0.13s; user-select:none; }
+.back-btn:hover { color:var(--blue); border-color:rgba(17,121,235,0.25); }
+.page-h { margin-bottom:20px; }
+.page-h h1 { font-size:22px; font-weight:800; letter-spacing:-0.5px; margin-bottom:3px; }
+.page-h p  { font-size:13px; color:var(--text-2); }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+.grid > * { animation:fadeUp 0.32s ease both; }
+.grid > *:nth-child(1){animation-delay:.04s}.grid > *:nth-child(2){animation-delay:.08s}
+.grid > *:nth-child(3){animation-delay:.11s}.grid > *:nth-child(4){animation-delay:.14s}
+.grid > *:nth-child(5){animation-delay:.17s}.grid > *:nth-child(6){animation-delay:.20s}
+.grid > *:nth-child(7){animation-delay:.23s}.grid > *:nth-child(8){animation-delay:.26s}
+
+/* ── RESPONSIVE ── */
+@media (max-width:1200px) {
+  .links-grid { grid-template-columns:repeat(7,1fr); }
+  .c3,.c4 { grid-column:span 6; }
+}
+@media (max-width:768px) {
+  .c3,.c4,.c5,.c6,.c7,.c8,.c12 { grid-column:span 12; }
+  .links-grid { grid-template-columns:repeat(4,1fr); }
+  .section-block,.sub-pad { padding-left:16px; padding-right:16px; }
+  .header { padding:0 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ══ -->
+<header class="header">
+  <div class="header-logo">
+    <img src="https://bookdwellia.com/images/dwellia-logo.png" alt="Dwellia" height="28">
+  </div>
+  <div class="header-right">
+    <div class="live-indicator"><div class="live-dot"></div><span id="last-updated">Loading…</span></div>
+    <div class="header-alert" id="header-alert" onclick="navigate('tasks')" style="display:none;">
+      <div class="adot"></div><span class="alert-text"></span>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════ MAIN PAGE ═══════════════════ -->
+<div class="mainpage" id="mainpage">
+
+  <!-- ── QUICK LINKS ── -->
+  <div class="section-block">
+    <div class="sh"><span class="sh-label">Quick Links</span><div class="sh-rule"></div></div>
+    <div class="card" style="padding:14px 18px;">
+      <div class="links-grid">
+        <a class="lnk" href="https://my.hospitable.com" target="_blank">
+          <span class="lnk-icon">🏡</span><span class="lnk-label">Hospitable</span>
+        </a>
+        <a class="lnk" href="https://hostbuddy-two.vercel.app/dashboard.html" target="_blank">
+          <span class="lnk-icon">🧠</span><span class="lnk-label">Dwellia Brain</span>
+        </a>
+        <a class="lnk" href="https://orphandays.vercel.app/dashboard.html" target="_blank">
+          <span class="lnk-icon">🗓️</span><span class="lnk-label">Orphan Days</span>
+        </a>
+        <a class="lnk" href="https://app.openphone.com" target="_blank">
+          <span class="lnk-icon">📞</span><span class="lnk-label">Quo</span>
+        </a>
+        <a class="lnk" href="https://app.brevo.com/login" target="_blank">
+          <span class="lnk-icon">✉️</span><span class="lnk-label">Brevo</span>
+        </a>
+        <a class="lnk" href="https://www.airbnb.com/hosting/reservations" target="_blank">
+          <span class="lnk-icon">🏠</span><span class="lnk-label">Airbnb</span>
+        </a>
+        <a class="lnk" href="https://www.vrbo.com/login" target="_blank">
+          <span class="lnk-icon">🏘️</span><span class="lnk-label">VRBO</span>
+        </a>
+        <a class="lnk" href="https://account.booking.com" target="_blank">
+          <span class="lnk-icon">🌐</span><span class="lnk-label">Booking.com</span>
+        </a>
+        <a class="lnk" href="https://drive.google.com" target="_blank">
+          <span class="lnk-icon">📁</span><span class="lnk-label">Google Drive</span>
+        </a>
+        <a class="lnk" href="https://www.amazon.com/gp/css/order-history" target="_blank">
+          <span class="lnk-icon">📦</span><span class="lnk-label">Amazon</span>
+        </a>
+        <a class="lnk" href="https://app.turno.com/login" target="_blank">
+          <span class="lnk-icon">🧹</span><span class="lnk-label">Turno</span>
+        </a>
+        <a class="lnk" href="https://app.waivo.io" target="_blank">
+          <span class="lnk-icon">🛡️</span><span class="lnk-label">Waivo</span>
+        </a>
+        <a class="lnk" href="https://dashboard.stayfi.com" target="_blank">
+          <span class="lnk-icon">📶</span><span class="lnk-label">StayFi</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── OCCUPANCY & STAYS ── -->
+  <div class="section-block">
+    <div class="sh"><span class="sh-label">Occupancy & Stays</span><div class="sh-rule"></div></div>
+    <div class="grid">
+
+      <!-- Current Stays -->
+      <div class="card click c4" onclick="navigate('occupancy')">
+        <div class="clabel">🏠 Current Stays</div>
+        <div class="prop-blk">
+          <div class="prop-head">
+            <span class="prop-name"><span class="dot" style="background:var(--blue)"></span>Delta Dawn</span>
+            <span class="badge green" id="delta-status">● Loading…</span>
+          </div>
+          <div class="stay-blk">
+            <div><div class="stay-dates" id="delta-dates">—</div><div class="stay-guest" id="delta-guest"></div></div>
+            <div class="stay-nights"><span id="delta-nights"></span><br><span style="color:var(--amber);font-size:10px;" id="delta-out"></span></div>
+          </div>
+        </div>
+        <div class="prop-blk">
+          <div class="prop-head">
+            <span class="prop-name"><span class="dot" style="background:var(--orange)"></span>LeGobi Villa</span>
+            <span class="badge green" id="legobi-status">● Loading…</span>
+          </div>
+          <div class="stay-blk oj">
+            <div><div class="stay-dates" id="legobi-dates">—</div><div class="stay-guest" id="legobi-guest"></div></div>
+            <div class="stay-nights"><span id="legobi-nights"></span><br><span style="color:var(--amber);font-size:10px;" id="legobi-out"></span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Calendars: May + June, both properties -->
+      <div class="card click c5" onclick="navigate('occupancy')">
+        <div class="clabel">📅 May & June</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div>
+            <div class="cal-month-label" style="color:var(--blue)">May · Delta <span style="font-family:'DM Mono',monospace">74%</span></div>
+            <div class="cal-hds"><span class="cal-hd">S</span><span class="cal-hd">M</span><span class="cal-hd">T</span><span class="cal-hd">W</span><span class="cal-hd">T</span><span class="cal-hd">F</span><span class="cal-hd">S</span></div>
+            <div class="cal-g">
+              <div class="cal-d empty"></div>
+              <div class="cal-d empty"></div>
+              <div class="cal-d empty"></div>
+              <div class="cal-d empty"></div>
+              <div class="cal-d empty"></div>
+              <div class="cal-d open" data-date="2026-05-01" data-prop="delta">1</div>
+              <div class="cal-d open" data-date="2026-05-02" data-prop="delta">2</div>
+              <div class="cal-d open" data-date="2026-05-03" data-prop="delta">3</div>
+              <div class="cal-d open" data-date="2026-05-04" data-prop="delta">4</div>
+              <div class="cal-d open" data-date="2026-05-05" data-prop="delta">5</div>
+              <div class="cal-d open" data-date="2026-05-06" data-prop="delta">6</div>
+              <div class="cal-d open" data-date="2026-05-07" data-prop="delta">7</div>
+              <div class="cal-d open" data-date="2026-05-08" data-prop="delta">8</div>
+              <div class="cal-d open" data-date="2026-05-09" data-prop="delta">9</div>
+              <div class="cal-d open" data-date="2026-05-10" data-prop="delta">10</div>
+              <div class="cal-d open" data-date="2026-05-11" data-prop="delta">11</div>
+              <div class="cal-d open" data-date="2026-05-12" data-prop="delta">12</div>
+              <div class="cal-d open" data-date="2026-05-13" data-prop="delta">13</div>
+              <div class="cal-d open" data-date="2026-05-14" data-prop="delta">14</div>
+              <div class="cal-d open" data-date="2026-05-15" data-prop="delta">15</div>
+              <div class="cal-d open" data-date="2026-05-16" data-prop="delta">16</div>
+              <div class="cal-d open" data-date="2026-05-17" data-prop="delta">17</div>
+              <div class="cal-d open" data-date="2026-05-18" data-prop="delta">18</div>
+              <div class="cal-d open" data-date="2026-05-19" data-prop="delta">19</div>
+              <div class="cal-d open" data-date="2026-05-20" data-prop="delta">20</div>
+              <div class="cal-d open" data-date="2026-05-21" data-prop="delta">21</div>
+              <div class="cal-d open" data-date="2026-05-22" data-prop="delta">22</div>
+              <div class="cal-d open" data-date="2026-05-23" data-prop="delta">23</div>
+              <div class="cal-d open" data-date="2026-05-24" data-prop="delta">24</div>
+              <div class="cal-d open" data-date="2026-05-25" data-prop="delta">25</div>
+              <div class="cal-d open" data-date="2026-05-26" data-prop="delta">26</div>
+              <div class="cal-d open" data-date="2026-05-27" data-prop="delta">27</div>
+              <div class="cal-d open" data-date="2026-05-28" data-prop="delta">28</div>
+              <div class="cal-d open" data-date="2026-05-29" data-prop="delta">29</div>
+              <div class="cal-d open" data-date="2026-05-30" data-prop="delta">30</div>
+              <div class="cal-d open" data-date="2026-05-31" data-prop="delta">31</div>
+            </div>
+            <div class="cal-month-label" style="color:var(--blue);margin-top:10px;padding-top:8px;border-top:1px solid rgba(0,0,0,0.06)">Jun · Delta</div>
+            <div class="cal-hds"><span class="cal-hd">S</span><span class="cal-hd">M</span><span class="cal-hd">T</span><span class="cal-hd">W</span><span class="cal-hd">T</span><span class="cal-hd">F</span><span class="cal-hd">S</span></div>
+            <div class="cal-g">
+              <div class="cal-d empty"></div>
+              <div class="cal-d open" data-date="2026-06-01" data-prop="delta">1</div>
+              <div class="cal-d open" data-date="2026-06-02" data-prop="delta">2</div>
+              <div class="cal-d open" data-date="2026-06-03" data-prop="delta">3</div>
+              <div class="cal-d open" data-date="2026-06-04" data-prop="delta">4</div>
+              <div class="cal-d open" data-date="2026-06-05" data-prop="delta">5</div>
+              <div class="cal-d open" data-date="2026-06-06" data-prop="delta">6</div>
+              <div class="cal-d open" data-date="2026-06-07" data-prop="delta">7</div>
+              <div class="cal-d open" data-date="2026-06-08" data-prop="delta">8</div>
+              <div class="cal-d open" data-date="2026-06-09" data-prop="delta">9</div>
+              <div class="cal-d open" data-date="2026-06-10" data-prop="delta">10</div>
+              <div class="cal-d open" data-date="2026-06-11" data-prop="delta">11</div>
+              <div class="cal-d open" data-date="2026-06-12" data-prop="delta">12</div>
+              <div class="cal-d open" data-date="2026-06-13" data-prop="delta">13</div>
+              <div class="cal-d open" data-date="2026-06-14" data-prop="delta">14</div>
+              <div class="cal-d open" data-date="2026-06-15" data-prop="delta">15</div>
+              <div class="cal-d open" data-date="2026-06-16" data-prop="delta">16</div>
+              <div class="cal-d open" data-date="2026-06-17" data-prop="delta">17</div>
+              <div class="cal-d open" data-date="2026-06-18" data-prop="delta">18</div>
+              <div class="cal-d open" data-date="2026-06-19" data-prop="delta">19</div>
+              <div class="cal-d open" data-date="2026-06-20" data-prop="delta">20</div>
+              <div class="cal-d open" data-date="2026-06-21" data-prop="delta">21</div>
+              <div class="cal-d open" data-date="2026-06-22" data-prop="delta">22</div>
+              <div class="cal-d open" data-date="2026-06-23" data-prop="delta">23</div>
+              <div class="cal-d open" data-date="2026-06-24" data-prop="delta">24</div>
+              <div class="cal-d open" data-date="2026-06-25" data-prop="delta">25</div>
+              <div class="cal-d open" data-date="2026-06-26" data-prop="delta">26</div>
+              <div class="cal-d open" data-date="2026-06-27" data-prop="delta">27</div>
+              <div class="cal-d open" data-date="2026-06-28" data-prop="delta">28</div>
+              <div class="cal-d open" data-date="2026-06-29" data-prop="delta">29</div>
+              <div class="cal-d open" data-date="2026-06-30" data-prop="delta">30</div>
+            </div>
+          </div>
+          <div>
+            <div class="cal-month-label" style="color:var(--orange)">May · LeGobi <span style="font-family:'DM Mono',monospace">61%</span></div>
+            <div class="cal-hds"><span class="cal-hd">S</span><span class="cal-hd">M</span><span class="cal-hd">T</span><span class="cal-hd">W</span><span class="cal-hd">T</span><span class="cal-hd">F</span><span class="cal-hd">S</span></div>
+            <div class="cal-g">
+              <div class="cal-d empty"></div>
+              <div class="cal-d empty"></div>
+              <div class="cal-d empty"></div>
+              <div class="cal-d empty"></div>
+              <div class="cal-d empty"></div>
+              <div class="cal-d open" data-date="2026-05-01" data-prop="legobi">1</div>
+              <div class="cal-d open" data-date="2026-05-02" data-prop="legobi">2</div>
+              <div class="cal-d open" data-date="2026-05-03" data-prop="legobi">3</div>
+              <div class="cal-d open" data-date="2026-05-04" data-prop="legobi">4</div>
+              <div class="cal-d open" data-date="2026-05-05" data-prop="legobi">5</div>
+              <div class="cal-d open" data-date="2026-05-06" data-prop="legobi">6</div>
+              <div class="cal-d open" data-date="2026-05-07" data-prop="legobi">7</div>
+              <div class="cal-d open" data-date="2026-05-08" data-prop="legobi">8</div>
+              <div class="cal-d open" data-date="2026-05-09" data-prop="legobi">9</div>
+              <div class="cal-d open" data-date="2026-05-10" data-prop="legobi">10</div>
+              <div class="cal-d open" data-date="2026-05-11" data-prop="legobi">11</div>
+              <div class="cal-d open" data-date="2026-05-12" data-prop="legobi">12</div>
+              <div class="cal-d open" data-date="2026-05-13" data-prop="legobi">13</div>
+              <div class="cal-d open" data-date="2026-05-14" data-prop="legobi">14</div>
+              <div class="cal-d open" data-date="2026-05-15" data-prop="legobi">15</div>
+              <div class="cal-d open" data-date="2026-05-16" data-prop="legobi">16</div>
+              <div class="cal-d open" data-date="2026-05-17" data-prop="legobi">17</div>
+              <div class="cal-d open" data-date="2026-05-18" data-prop="legobi">18</div>
+              <div class="cal-d open" data-date="2026-05-19" data-prop="legobi">19</div>
+              <div class="cal-d open" data-date="2026-05-20" data-prop="legobi">20</div>
+              <div class="cal-d open" data-date="2026-05-21" data-prop="legobi">21</div>
+              <div class="cal-d open" data-date="2026-05-22" data-prop="legobi">22</div>
+              <div class="cal-d open" data-date="2026-05-23" data-prop="legobi">23</div>
+              <div class="cal-d open" data-date="2026-05-24" data-prop="legobi">24</div>
+              <div class="cal-d open" data-date="2026-05-25" data-prop="legobi">25</div>
+              <div class="cal-d open" data-date="2026-05-26" data-prop="legobi">26</div>
+              <div class="cal-d open" data-date="2026-05-27" data-prop="legobi">27</div>
+              <div class="cal-d open" data-date="2026-05-28" data-prop="legobi">28</div>
+              <div class="cal-d open" data-date="2026-05-29" data-prop="legobi">29</div>
+              <div class="cal-d open" data-date="2026-05-30" data-prop="legobi">30</div>
+              <div class="cal-d open" data-date="2026-05-31" data-prop="legobi">31</div>
+            </div>
+            <div class="cal-month-label" style="color:var(--orange);margin-top:10px;padding-top:8px;border-top:1px solid rgba(0,0,0,0.06)">Jun · LeGobi</div>
+            <div class="cal-hds"><span class="cal-hd">S</span><span class="cal-hd">M</span><span class="cal-hd">T</span><span class="cal-hd">W</span><span class="cal-hd">T</span><span class="cal-hd">F</span><span class="cal-hd">S</span></div>
+            <div class="cal-g">
+              <div class="cal-d empty"></div>
+              <div class="cal-d open" data-date="2026-06-01" data-prop="legobi">1</div>
+              <div class="cal-d open" data-date="2026-06-02" data-prop="legobi">2</div>
+              <div class="cal-d open" data-date="2026-06-03" data-prop="legobi">3</div>
+              <div class="cal-d open" data-date="2026-06-04" data-prop="legobi">4</div>
+              <div class="cal-d open" data-date="2026-06-05" data-prop="legobi">5</div>
+              <div class="cal-d open" data-date="2026-06-06" data-prop="legobi">6</div>
+              <div class="cal-d open" data-date="2026-06-07" data-prop="legobi">7</div>
+              <div class="cal-d open" data-date="2026-06-08" data-prop="legobi">8</div>
+              <div class="cal-d open" data-date="2026-06-09" data-prop="legobi">9</div>
+              <div class="cal-d open" data-date="2026-06-10" data-prop="legobi">10</div>
+              <div class="cal-d open" data-date="2026-06-11" data-prop="legobi">11</div>
+              <div class="cal-d open" data-date="2026-06-12" data-prop="legobi">12</div>
+              <div class="cal-d open" data-date="2026-06-13" data-prop="legobi">13</div>
+              <div class="cal-d open" data-date="2026-06-14" data-prop="legobi">14</div>
+              <div class="cal-d open" data-date="2026-06-15" data-prop="legobi">15</div>
+              <div class="cal-d open" data-date="2026-06-16" data-prop="legobi">16</div>
+              <div class="cal-d open" data-date="2026-06-17" data-prop="legobi">17</div>
+              <div class="cal-d open" data-date="2026-06-18" data-prop="legobi">18</div>
+              <div class="cal-d open" data-date="2026-06-19" data-prop="legobi">19</div>
+              <div class="cal-d open" data-date="2026-06-20" data-prop="legobi">20</div>
+              <div class="cal-d open" data-date="2026-06-21" data-prop="legobi">21</div>
+              <div class="cal-d open" data-date="2026-06-22" data-prop="legobi">22</div>
+              <div class="cal-d open" data-date="2026-06-23" data-prop="legobi">23</div>
+              <div class="cal-d open" data-date="2026-06-24" data-prop="legobi">24</div>
+              <div class="cal-d open" data-date="2026-06-25" data-prop="legobi">25</div>
+              <div class="cal-d open" data-date="2026-06-26" data-prop="legobi">26</div>
+              <div class="cal-d open" data-date="2026-06-27" data-prop="legobi">27</div>
+              <div class="cal-d open" data-date="2026-06-28" data-prop="legobi">28</div>
+              <div class="cal-d open" data-date="2026-06-29" data-prop="legobi">29</div>
+              <div class="cal-d open" data-date="2026-06-30" data-prop="legobi">30</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:12px;padding-top:10px;border-top:1px solid rgba(0,0,0,0.05);font-size:10px;color:var(--text-3);">
+          <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--blue);margin-right:3px;vertical-align:middle;"></span>Delta booked</span>
+          <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--orange);margin-right:3px;vertical-align:middle;"></span>LeGobi booked</span>
+          <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:rgba(0,0,0,0.07);margin-right:3px;vertical-align:middle;"></span>Open</span>
+          <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;border:2px solid var(--orange);margin-right:3px;vertical-align:middle;"></span>Today</span>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="card c3">
+        <div class="clabel">📈 YTD Metrics</div>
+        <div class="stat-grid">
+          <div class="stat-blk"><div class="stat-val blue" id="kpi-occ">—</div><div class="stat-lbl">Occupancy</div></div>
+          <div class="stat-blk"><div class="stat-val orange" id="kpi-rating">4.96★</div><div class="stat-lbl">Rating</div></div>
+          <div class="stat-blk"><div class="stat-val" id="kpi-adr">—</div><div class="stat-lbl">ADR</div></div>
+          <div class="stat-blk"><div class="stat-val green" id="kpi-revpar">—</div><div class="stat-lbl">RevPAR</div></div>
+          <div class="stat-blk"><div class="stat-val" id="kpi-los">—</div><div class="stat-lbl">Avg LOS</div></div>
+          <div class="stat-blk"><div class="stat-val" id="kpi-window">—</div><div class="stat-lbl">Booking window</div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── REVENUE ── -->
+  <div class="section-block">
+    <div class="sh"><span class="sh-label">Revenue</span><div class="sh-rule"></div></div>
+    <div class="grid">
+
+      <div class="card click c4" onclick="navigate('financials')">
+        <div class="clabel">💰 Revenue</div>
+        <div class="toggles" id="rev-tabs" onclick="handleRevToggle(event)">
+          <div class="toggle active" data-p="30">30 Days</div>
+          <div class="toggle" data-p="60">60 Days</div>
+          <div class="toggle" data-p="90">90 Days</div>
+        </div>
+        <div class="cvalue blue" id="rv">Loading…</div>
+        <div class="csub" id="rs"> </div>
+        <div class="row" style="border-top:none;"><span class="rlabel"><span class="dot" style="background:var(--blue)"></span>Delta Dawn</span><span class="rval" id="rdd">—</span></div>
+        <div class="row"><span class="rlabel"><span class="dot" style="background:var(--orange)"></span>LeGobi Villa</span><span class="rval" id="rlg">—</span></div>
+        <div class="spark" id="rev-spark">
+          <div class="spark-b" style="height:42%"></div><div class="spark-b" style="height:58%"></div>
+          <div class="spark-b" style="height:48%"></div><div class="spark-b" style="height:72%"></div>
+          <div class="spark-b" style="height:66%"></div><div class="spark-b" style="height:80%"></div>
+          <div class="spark-b" style="height:73%"></div><div class="spark-b" style="height:89%"></div>
+          <div class="spark-b" style="height:84%"></div><div class="spark-b hi" style="height:100%"></div>
+        </div>
+      </div>
+
+      <div class="card click c4" onclick="navigate('financials')">
+        <div class="clabel">📊 Booking Source · YTD</div>
+        <div style="margin-bottom:12px;">
+          <div class="src-row"><div class="src-dot" style="background:var(--blue)"></div><span class="src-name">Direct</span><div class="src-bg"><div class="src-fill" id="src-direct-bar" style="width:0%;background:var(--blue)"></div></div><span class="src-pct" style="color:var(--blue)" id="src-direct-pct">—</span></div>
+          <div class="src-row"><div class="src-dot" style="background:#FF385C"></div><span class="src-name">Airbnb</span><div class="src-bg"><div class="src-fill" id="src-airbnb-bar" style="width:0%;background:#FF385C"></div></div><span class="src-pct" id="src-airbnb-pct">—</span></div>
+          <div class="src-row"><div class="src-dot" style="background:#1664C8"></div><span class="src-name">VRBO</span><div class="src-bg"><div class="src-fill" id="src-vrbo-bar" style="width:0%;background:#1664C8"></div></div><span class="src-pct" id="src-vrbo-pct">—</span></div>
+        </div>
+        <div class="row" style="border-top:none;"><span class="rlabel">YTD nights booked</span><span class="rval">186</span></div>
+        <div class="row"><span class="rlabel">Repeat guests</span><span class="rval" style="color:var(--green)">14%</span></div>
+        <div class="row"><span class="rlabel">Families served</span><span class="rval">62</span></div>
+      </div>
+
+      <div class="card click c4" onclick="window.open('https://orphandays.vercel.app/dashboard.html','_blank')">
+        <div class="clabel">✨ Upsell Opportunities</div>
+        <div class="upsell-item">
+          <div class="upsell-head"><span class="upsell-title">🗓️ Orphan Days</span><span class="upsell-price">from $149/nt</span></div>
+          <div class="upsell-desc">Gap nights between bookings available to fill.</div>
+          <div class="avail"><span class="badge blue">Delta: May 13–14</span><span class="badge blue">Delta: May 21</span><span class="badge orange">LeGobi: May 23–24</span></div>
+        </div>
+        <div class="upsell-item">
+          <div class="upsell-head"><span class="upsell-title">🌅 Early Check-in</span><span class="upsell-price">+$75</span></div>
+          <div class="avail"><span class="badge green">Delta: May 18 ✓</span><span class="badge green">LeGobi: May 25 ✓</span></div>
+        </div>
+        <div class="upsell-item">
+          <div class="upsell-head"><span class="upsell-title">🌙 Late Check-out</span><span class="upsell-price">+$75</span></div>
+          <div class="avail"><span class="badge green">Delta: May 20 ✓</span><span class="badge green">LeGobi: May 22 ✓</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── OPERATIONS ── -->
+  <div class="section-block">
+    <div class="sh"><span class="sh-label">Operations</span><div class="sh-rule"></div></div>
+    <div class="grid">
+
+      <div class="card click c6" onclick="navigate('tasks')">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <div class="clabel" style="margin-bottom:0;">✅ Task Pipeline</div>
+          <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3);"><div class="live-dot"></div>Asana · Delta: 15 open · LeGobi: 10 open</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+          <div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+              <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--red)">Overdue</span>
+              <span class="badge red" id="badge-overdue">—</span>
+            </div>
+            <div id="tasks-overdue"><div class="task-empty" style="font-size:11.5px;color:var(--text-3);padding:10px;background:var(--bg);border-radius:var(--radius-sm);text-align:center;">Loading…</div></div>
+          </div>
+          <div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+              <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--amber)">Today</span>
+              <span class="badge amber" id="badge-today">—</span>
+            </div>
+            <div id="tasks-today"><div class="task-empty" style="font-size:11.5px;color:var(--text-3);padding:10px;background:var(--bg);border-radius:var(--radius-sm);text-align:center;">Loading…</div></div>
+          </div>
+          <div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+              <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--blue)">This Week</span>
+              <span class="badge blue" id="badge-week">—</span>
+            </div>
+            <div id="tasks-week"><div class="task-empty" style="font-size:11.5px;color:var(--text-3);padding:10px;background:var(--bg);border-radius:var(--radius-sm);text-align:center;">Loading…</div></div>
+          </div>
+        </div>
+        <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(0,0,0,0.05);display:flex;gap:14px;font-size:11px;color:var(--text-3);">
+          <span id="tasks-delta-summary">Delta: loading…</span>
+          <span id="tasks-legobi-summary">LeGobi: loading…</span>
+        </div>
+      </div>
+
+      <div class="card click c6" onclick="window.open('https://hostbuddy-two.vercel.app/dashboard.html','_blank')">
+        <div class="clabel">🤖 Action Items <span style="font-size:9px;text-transform:none;letter-spacing:0;font-weight:600;color:var(--text-3)">via HostBuddy AI</span></div>
+        <div id="action-items-list"><div style="font-size:12px;color:var(--text-3);text-align:center;padding:14px 0">Loading…</div></div>
+        <div style="margin-top:10px;font-size:11px;color:var(--text-3);text-align:center;">Open full HostBuddy dashboard →</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── GUESTS ── -->
+  <div class="section-block">
+    <div class="sh"><span class="sh-label">Guests</span><div class="sh-rule"></div></div>
+    <div class="grid">
+
+      <div class="card click c8" onclick="navigate('reviews')">
+        <div class="clabel">⭐ Recent Reviews <span style="margin-left:6px;font-family:'DM Mono',monospace;font-size:11px;color:var(--orange);letter-spacing:0;text-transform:none;font-weight:700;">4.96★ avg</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px;">
+          <div>
+            <div style="font-size:10px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Delta Dawn</div>
+            <div class="review"><div class="review-head"><span class="review-guest">Johnson Family</span><div class="review-meta"><span class="stars">★★★★★</span><span class="review-date">May 12</span></div></div><p class="review-text">"Owners were SO responsive — felt like talking to a friend. Kids loved the game room."</p></div>
+            <div class="review"><div class="review-head"><span class="review-guest">Martinez Family</span><div class="review-meta"><span class="stars">★★★★★</span><span class="review-date">May 6</span></div></div><p class="review-text">"Immaculate. Mountain views from the fireplace were stunning. Will definitely be back."</p></div>
+          </div>
+          <div>
+            <div style="font-size:10px;font-weight:700;color:var(--orange);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">LeGobi Villa</div>
+            <div class="review"><div class="review-head"><span class="review-guest">Kim Family</span><div class="review-meta"><span class="stars">★★★★★</span><span class="review-date">May 14</span></div></div><p class="review-text">"Our kids are still talking about the LEGO rooms two weeks later. Pure magic."</p></div>
+            <div class="review"><div class="review-head"><span class="review-guest">Williams Family</span><div class="review-meta"><span class="stars">★★★★★</span><span class="review-date">May 8</span></div></div><p class="review-text">"Themed bedrooms, arcade, private theater — we didn't want to leave."</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card c4">
+        <div class="clabel">✉️ Brevo · Email Marketing</div>
+        <div id="brevo-no-api" style="background:var(--amber-lt);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:12px;border-left:3px solid var(--amber);">
+          <div style="font-size:11.5px;font-weight:700;color:var(--amber);margin-bottom:3px;">API key needed</div>
+          <div style="font-size:11px;color:var(--text-2);line-height:1.5;">Add BREVO_API_KEY to Vercel env vars to unlock.</div>
+        </div>
+        <div id="brevo-stats" style="display:none;">
+          <div class="row" style="border-top:none;"><span class="rlabel">Last campaign</span><span class="rval" id="brevo-campaign" style="font-size:11px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">—</span></div>
+          <div class="row"><span class="rlabel">Sent</span><span class="rval" id="brevo-sent">—</span></div>
+          <div class="row"><span class="rlabel">Open rate</span><span class="rval" id="brevo-open">—</span></div>
+          <div class="row"><span class="rlabel">Click rate</span><span class="rval" id="brevo-click">—</span></div>
+        </div>
+        <div class="row"><span class="rlabel">Contacts</span><span class="rval" id="brevo-contacts">—</span></div>
+        <a href="https://app.brevo.com/login" target="_blank" style="display:inline-flex;align-items:center;gap:5px;margin-top:10px;font-size:11.5px;color:var(--blue);font-weight:600;text-decoration:none;">Open Brevo →</a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── AI PROCESSES ── -->
+  <div class="section-block">
+    <div class="sh"><span class="sh-label">AI Processes</span><div class="sh-rule"></div></div>
+    <div class="grid">
+
+      <!-- HostBuddy -->
+      <div class="ai-card c3" onclick="window.open('https://hostbuddy-two.vercel.app/dashboard.html','_blank')">
+        <div class="ai-card-head">
+          <div class="ai-card-title"><span class="ai-card-icon">🤖</span>HostBuddy AI</div>
+          <span class="badge green">Active</span>
+        </div>
+        <div class="ai-card-desc">Monitors guest messages in Hospitable. Detects action items, routes urgent issues via Quo SMS, and logs everything to the action items dashboard.</div>
+      </div>
+
+      <!-- Orphan Days -->
+      <div class="ai-card orange c3" onclick="window.open('https://orphandays.vercel.app/dashboard.html','_blank')">
+        <div class="ai-card-head">
+          <div class="ai-card-title"><span class="ai-card-icon">🗓️</span>Orphan Days</div>
+          <span class="badge green">Active</span>
+        </div>
+        <div class="ai-card-desc">Automatically identifies gap nights between confirmed bookings and surfaces upsell offers for early check-in, late check-out, and discounted orphan nights.</div>
+      </div>
+
+      <!-- Guidebook / SMS -->
+      <div class="ai-card teal c3" onclick="">
+        <div class="ai-card-head">
+          <div class="ai-card-title"><span class="ai-card-icon">📱</span>Guidebook / SMS</div>
+          <span class="badge gray">Planned</span>
+        </div>
+        <div class="ai-card-desc">AI-powered guest guidebook with SMS delivery at check-in. Sends local recommendations, house rules, and FAQs automatically via Quo at booking confirmation.</div>
+      </div>
+
+      <!-- Asana -->
+      <div class="ai-card c3" onclick="window.open('https://app.asana.com','_blank')">
+        <div class="ai-card-head">
+          <div class="ai-card-title"><span class="ai-card-icon">✅</span>Asana Tasks</div>
+          <span class="badge green">Connected</span>
+        </div>
+        <div class="ai-card-desc">Operations backbone for both properties. Tracks maintenance schedules, recurring inspections, and ad-hoc action items. Delta: 15 open · LeGobi: 10 open.</div>
+      </div>
+
+      <!-- AutoReview -->
+      <div class="ai-card green c3" onclick="">
+        <div class="ai-card-head">
+          <div class="ai-card-title"><span class="ai-card-icon">⭐</span>AutoReview</div>
+          <span class="badge gray">Planned</span>
+        </div>
+        <div class="ai-card-desc">After checkout, drafts a personalized review response using guest name, stay details, and key mentions from their review. One-click approve and post from the dashboard.</div>
+      </div>
+
+      <!-- Dwellia Brain -->
+      <div class="ai-card purple c3" onclick="window.open('https://hostbuddy-two.vercel.app/dashboard.html','_blank')">
+        <div class="ai-card-head">
+          <div class="ai-card-title"><span class="ai-card-icon">🧠</span>Dwellia Brain</div>
+          <span class="badge green">Active</span>
+        </div>
+        <div class="ai-card-desc">Central AI intelligence layer. Orchestrates HostBuddy, routing decisions, property context, and guest communication logic across all Dwellia automation pipelines.</div>
+      </div>
+
+      <!-- Brevo -->
+      <div class="ai-card teal c3" onclick="window.open('https://app.brevo.com','_blank')">
+        <div class="ai-card-head">
+          <div class="ai-card-title"><span class="ai-card-icon">✉️</span>Brevo Campaigns</div>
+          <span class="badge amber">API needed</span>
+        </div>
+        <div class="ai-card-desc">Post-stay email sequences triggered automatically at checkout. Targets repeat bookings, referrals, and direct booking conversion. Stats available once API key is connected.</div>
+      </div>
+
+      <!-- SEO -->
+      <div class="ai-card pink c3" onclick="">
+        <div class="ai-card-head">
+          <div class="ai-card-title"><span class="ai-card-icon">🔍</span>SEO / Listings</div>
+          <span class="badge gray">Planned</span>
+        </div>
+        <div class="ai-card-desc">AI-optimized listing copy refreshes for Airbnb, VRBO, and direct site. Monitors search rank for key queries and surfaces keyword and photo recommendations seasonally.</div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- end mainpage -->
+
+
+<!-- ═══════════════ SUB-PAGES ═══════════════ -->
+
+<div class="subpage" id="sub-tasks">
+<div class="sub-pad">
+  <div class="back-btn" onclick="goBack()">← Dashboard</div>
+  <div class="page-h"><h1>Task Pipeline</h1><p>Live from Asana · Delta Dawn: 15 open · LeGobi Villa: 10 open</p></div>
+  <div class="grid">
+    <div class="card c4">
+      <div class="clabel" style="color:var(--green)">✓ Overdue</div>
+      <div style="font-size:12px;color:var(--text-3);padding:14px;background:var(--bg);border-radius:var(--radius-sm);text-align:center;">No overdue tasks — all clear ✓</div>
+    </div>
+    <div class="card c4">
+      <div class="clabel" style="color:var(--amber)">🟡 Due Soon — Live from Asana</div>
+      <div class="task today"><div class="task-title">NEXT CLEAN: Arcade shooting game left gun loose wire</div><div class="task-meta"><span>Amanda Fazecas Rocha · Due May 17</span><span class="tprop lg">LeGobi</span></div></div>
+    </div>
+    <div class="card c4">
+      <div class="clabel" style="color:var(--blue)">🔵 Upcoming</div>
+      <div class="task week"><div class="task-title">Monthly inspection</div><div class="task-meta"><span>Recurring</span><span class="tprop dd">Delta</span></div></div>
+      <div class="task week"><div class="task-title">3-month inspection</div><div class="task-meta"><span>Recurring</span><span class="tprop lg">LeGobi</span></div></div>
+    </div>
+  </div>
+  <div style="margin-top:14px;background:var(--blue-lt);border-radius:var(--radius);padding:13px 16px;font-size:12px;color:var(--blue);border:1px solid rgba(17,121,235,0.15);">
+    Full task search requires Asana Premium. <a href="https://app.asana.com" target="_blank" style="color:var(--blue);font-weight:700;">Open Asana →</a>
+  </div>
+</div>
+</div>
+
+<div class="subpage" id="sub-occupancy">
+<div class="sub-pad">
+  <div class="back-btn" onclick="goBack()">← Dashboard</div>
+  <div class="page-h"><h1>Occupancy</h1><p>Current stays & upcoming bookings</p></div>
+  <div class="grid">
+    <div class="card c6">
+      <div class="clabel"><span class="dot" style="background:var(--blue);margin-right:4px"></span>Delta Dawn Retreat</div>
+      <div class="prop-blk" style="padding-top:0;"><div class="prop-head"><span style="font-weight:700;font-size:12.5px">Current Stay</span><span class="badge green">● Occupied</span></div><div class="stay-blk"><div><div class="stay-dates">May 15 – May 20</div><div class="stay-guest">Johnson Family · 5 nights</div></div><div class="stay-nights">Checkout May 20</div></div></div>
+      <div class="prop-blk"><div class="prop-head"><span style="font-weight:700;font-size:12.5px">Next Stay</span><span class="badge blue">Confirmed</span></div><div class="stay-blk"><div><div class="stay-dates">May 22 – May 26</div><div class="stay-guest">Thompson Group · 4 nights</div></div></div></div>
+    </div>
+    <div class="card c6">
+      <div class="clabel"><span class="dot" style="background:var(--orange);margin-right:4px"></span>LeGobi Villa</div>
+      <div class="prop-blk" style="padding-top:0;"><div class="prop-head"><span style="font-weight:700;font-size:12.5px">Current Stay</span><span class="badge green">● Occupied</span></div><div class="stay-blk oj"><div><div class="stay-dates">May 16 – May 22</div><div class="stay-guest">Rodriguez Family · 6 nights</div></div><div class="stay-nights">Checkout May 22</div></div></div>
+      <div class="prop-blk"><div class="prop-head"><span style="font-weight:700;font-size:12.5px">Next Stay</span><span class="badge blue">Confirmed</span></div><div class="stay-blk oj"><div><div class="stay-dates">May 25 – May 30</div><div class="stay-guest">Garcia Family · 5 nights</div></div></div></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="subpage" id="sub-reviews">
+<div class="sub-pad">
+  <div class="back-btn" onclick="goBack()">← Dashboard</div>
+  <div class="page-h"><h1>Guest Reviews</h1><p>4.96★ overall · Recent reviews across both properties</p></div>
+  <div class="grid">
+    <div class="card c6">
+      <div class="clabel"><span class="dot" style="background:var(--blue);margin-right:4px"></span>Delta Dawn</div>
+      <div class="review"><div class="review-head"><span class="review-guest">Johnson Family</span><div class="review-meta"><span class="stars">★★★★★</span><span class="review-date">May 12</span></div></div><p class="review-text">"Owners were SO responsive — felt like talking to a friend. Kids absolutely loved the game room."</p></div>
+      <div class="review"><div class="review-head"><span class="review-guest">Martinez Family</span><div class="review-meta"><span class="stars">★★★★★</span><span class="review-date">May 6</span></div></div><p class="review-text">"Immaculate. Mountain views from the outdoor fireplace were stunning. Communication was instant."</p></div>
+      <div class="review"><div class="review-head"><span class="review-guest">Thompson Group</span><div class="review-meta"><span class="stars">★★★★★</span><span class="review-date">Apr 28</span></div></div><p class="review-text">"Perfect mountain getaway. Spotless, pool was perfect temp, game room a hit with the whole group."</p></div>
+    </div>
+    <div class="card c6">
+      <div class="clabel"><span class="dot" style="background:var(--orange);margin-right:4px"></span>LeGobi Villa</div>
+      <div class="review"><div class="review-head"><span class="review-guest">Kim Family</span><div class="review-meta"><span class="stars">★★★★★</span><span class="review-date">May 14</span></div></div><p class="review-text">"Our kids are still talking about the LEGO rooms two weeks later. Pure magic."</p></div>
+      <div class="review"><div class="review-head"><span class="review-guest">Williams Family</span><div class="review-meta"><span class="stars">★★★★★</span><span class="review-date">May 8</span></div></div><p class="review-text">"Themed bedrooms, arcade, private theater — we didn't want to leave. Booking again next summer."</p></div>
+      <div class="review"><div class="review-head"><span class="review-guest">Garcia Family</span><div class="review-meta"><span class="stars">★★★★★</span><span class="review-date">Apr 30</span></div></div><p class="review-text">"Communication felt like talking to a friend who actually cared. Villa is genuinely incredible."</p></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="subpage" id="sub-financials">
+<div class="sub-pad">
+  <div class="back-btn" onclick="goBack()">← Dashboard</div>
+  <div class="page-h"><h1>Revenue</h1><p>Performance across both properties</p></div>
+  <div class="grid">
+    <div class="card c4"><div class="clabel">30-Day</div><div class="cvalue blue">$11,870</div><div class="csub">↑ +12%</div><div class="row" style="border-top:none;"><span class="rlabel"><span class="dot" style="background:var(--blue)"></span>Delta</span><span class="rval">$5,670</span></div><div class="row"><span class="rlabel"><span class="dot" style="background:var(--orange)"></span>LeGobi</span><span class="rval">$6,200</span></div></div>
+    <div class="card c4"><div class="clabel">60-Day</div><div class="cvalue blue">$22,140</div><div class="csub">↑ +8%</div><div class="row" style="border-top:none;"><span class="rlabel"><span class="dot" style="background:var(--blue)"></span>Delta</span><span class="rval">$10,480</span></div><div class="row"><span class="rlabel"><span class="dot" style="background:var(--orange)"></span>LeGobi</span><span class="rval">$11,660</span></div></div>
+    <div class="card c4"><div class="clabel">90-Day</div><div class="cvalue blue">$34,890</div><div class="csub">↑ +15%</div><div class="row" style="border-top:none;"><span class="rlabel"><span class="dot" style="background:var(--blue)"></span>Delta</span><span class="rval">$16,200</span></div><div class="row"><span class="rlabel"><span class="dot" style="background:var(--orange)"></span>LeGobi</span><span class="rval">$18,690</span></div></div>
+  </div>
+</div>
+</div>
+
+<script>
+// Navigation functions (kept inline — dashboard.js handles data)
+function navigate(page) {
+  document.getElementById('mainpage').classList.add('hidden');
+  document.querySelectorAll('.subpage').forEach(p => p.classList.remove('active'));
+  const t = document.getElementById('sub-' + page);
+  if (t) { t.classList.add('active'); window.scrollTo(0, 0); }
+}
+function goBack() {
+  document.querySelectorAll('.subpage').forEach(p => p.classList.remove('active'));
+  document.getElementById('mainpage').classList.remove('hidden');
+  window.scrollTo(0, 0);
+}
+</script>
+<script src="/dashboard.js"></script>
+</body>
+</html>
