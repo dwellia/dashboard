@@ -6,11 +6,8 @@ export default async function handler(req) {
   }
 
   let body;
-  try {
-    body = await req.json();
-  } catch {
-    return new Response('Bad request', { status: 400 });
-  }
+  try { body = await req.json(); }
+  catch { return new Response('Bad request', { status: 400 }); }
 
   const { password } = body;
 
@@ -21,15 +18,12 @@ export default async function handler(req) {
     });
   }
 
-  // Set auth cookie valid for 30 days
-  const maxAge = 60 * 60 * 24 * 30;
-  const cookieValue = process.env.COOKIE_SECRET;
-
+  const maxAge = 60 * 60 * 24 * 30; // 30 days
   return new Response(JSON.stringify({ ok: true }), {
     status: 200,
     headers: {
       'Content-Type': 'application/json',
-      'Set-Cookie': `dwellia_auth=${cookieValue}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${maxAge}`
+      'Set-Cookie': `dwellia_auth=${process.env.COOKIE_SECRET}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${maxAge}`
     }
   });
 }

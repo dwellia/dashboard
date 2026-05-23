@@ -1,5 +1,6 @@
 {
-  "rewrites": [
-    { "source": "/", "destination": "/public/dashboard.html" }
-  ]
+  "outputDirectory": "public",
+  "functions": {
+    "api/*.js": { "memory": 256 }
+  }
 }
